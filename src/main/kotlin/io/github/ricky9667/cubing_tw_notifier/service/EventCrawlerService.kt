@@ -42,19 +42,23 @@ class EventCrawlerService(
                         registrationTime = fetchRegistrationTime(eventUrl)
                     }
 
-                    // Extract the start date for database sorting
                     val startDate = extractStartDate(rawEventDate)
+
+                    val isPastEvent = startDate.isBefore(LocalDate.now())
+                    val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
 
                     val newEvent = CubingEvent(
                         url = eventUrl,
                         name = name,
                         eventDate = rawEventDate,
                         startDate = startDate,
-                        registrationTime = registrationTime
+                        registrationTime = registrationTime,
+                        isCreatedNotified = isPastEvent,
+                        isRegistrationNotified = isRegistrationPassed
                     )
 
                     eventRepository.save(newEvent)
-                    logger.info("Saved new event to database: $name")
+                    logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
                 }
             }
         } catch (e: Exception) {

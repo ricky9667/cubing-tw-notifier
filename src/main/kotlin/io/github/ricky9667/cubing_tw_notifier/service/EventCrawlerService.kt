@@ -32,7 +32,7 @@ class EventCrawlerService(
                 val aTag = tds[1].selectFirst("a") ?: continue
                 val name = aTag.text()
                 val relativeLink = aTag.attr("href")
-                val eventUrl = if (relativeLink.startsWith("http")) relativeLink else "$baseUrl$relativeLink"
+                val eventUrl = if (relativeLink.startsWith("http")) relativeLink else "$baseUrl/$relativeLink"
 
                 if (!eventRepository.existsByUrl(eventUrl)) {
                     logger.info("Found new event: $name. Fetching registration details...")

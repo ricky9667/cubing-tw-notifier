@@ -21,7 +21,11 @@ class EventCrawlerService(
         logger.info("Starting crawler pass for cubing-tw events...")
 
         try {
-            val document = Jsoup.connect(baseUrl).get()
+            val document = Jsoup.connect(baseUrl)
+                .userAgent("cubing-tw-notifier/1.0")
+                .timeout(10_000)
+                .get()
+
             val eventElements = document.select("div#nav-tabContent div.d-none.d-sm-block tbody tr")
 
             for (element in eventElements) {

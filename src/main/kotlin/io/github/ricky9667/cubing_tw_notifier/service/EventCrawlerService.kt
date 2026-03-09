@@ -62,7 +62,7 @@ class EventCrawlerService(
                 }
             }
         } catch (e: Exception) {
-            logger.error("Error occurred while crawling events: ${e.message}")
+            logger.error("Error occurred while crawling events: ${e.message}", e)
         }
     }
 

@@ -47,6 +47,10 @@ class EventCrawlerService(
                     }
 
                     val startDate = extractStartDate(rawEventDate)
+                    if (startDate == null) {
+                        logger.error("Skipping event $name due to unparseable date: $rawEventDate")
+                        continue // Skip to the next event
+                    }
 
                     val isPastEvent = startDate.isBefore(LocalDate.now())
                     val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
@@ -70,7 +74,7 @@ class EventCrawlerService(
         }
     }
 
-    private fun extractStartDate(rawDate: String): LocalDate {
+    private fun extractStartDate(rawDate: String): LocalDate? {
         return try {
             // Looks for exactly 4 digits, a slash, 2 digits, a slash, 2 digits (e.g., 2026/03/14)
             val regex = "^(\\d{4}/\\d{2}/\\d{2})".toRegex()
@@ -80,10 +84,10 @@ class EventCrawlerService(
                 val dateStr = match.value.replace("/", "-")
                 LocalDate.parse(dateStr)
             } else {
-                LocalDate.now() // Fallback if parsing completely fails
+                null
             }
         } catch (e: Exception) {
-            LocalDate.now()
+            null
         }
     }
 

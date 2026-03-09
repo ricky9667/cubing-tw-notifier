@@ -20,15 +20,14 @@ class CubingEvent(
     @Column(nullable = false)
     var eventDate: String, // e.g., "2026-04-15 ~ 2026-04-16"
 
-    @Column(name = "start_date")
+    @Column(nullable = false)
     var startDate: LocalDate, // Extracts just "2025-12-19" for logic/sorting
 
-    @Column(name = "registration_time")
     var registrationTime: LocalDateTime? = null,
 
-    @Column(name = "is_created_notified", nullable = false)
+    @Column(nullable = false)
     var isCreatedNotified: Boolean = false,
 
-    @Column(name = "is_registration_notified", nullable = false)
+    @Column(nullable = false)
     var isRegistrationNotified: Boolean = false
 )

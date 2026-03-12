@@ -9,9 +9,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+
 @Service
 class EventCrawlerService(
-    private val eventRepository: CubingEventRepository
+    private val eventRepository: CubingEventRepository,
+    private val notificationService: TelegramNotificationService
 ) {
     private val logger = LoggerFactory.getLogger(EventCrawlerService::class.java)
     private val baseUrl = "https://cubing-tw.net/event"
@@ -61,9 +63,14 @@ class EventCrawlerService(
                         eventDate = rawEventDate,
                         startDate = startDate,
                         registrationTime = registrationTime,
-                        isCreatedNotified = isPastEvent,
+                        isCreatedNotified = true,
                         isRegistrationNotified = isRegistrationPassed
                     )
+
+                    if (!isPastEvent) {
+                        logger.info("Dispatching Telegram notification for new event: $name")
+                        notificationService.sendNewEventNotification(newEvent)
+                    }
 
                     eventRepository.save(newEvent)
                     logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
@@ -142,4 +149,5 @@ class EventCrawlerService(
             logger.warn("Failed to parse extracted time string: $timeText")
             null
         }
-    }}
+    }
+}

@@ -63,17 +63,25 @@ class EventCrawlerService(
                         eventDate = rawEventDate,
                         startDate = startDate,
                         registrationTime = registrationTime,
-                        isCreatedNotified = true,
+                        isCreatedNotified = isPastEvent,
                         isRegistrationNotified = isRegistrationPassed
                     )
 
-                    if (!isPastEvent) {
-                        logger.info("Dispatching Telegram notification for new event: $name")
-                        notificationService.sendNewEventNotification(newEvent)
-                    }
-
                     eventRepository.save(newEvent)
                     logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
+
+                    if (!isPastEvent) {
+                        logger.info("Dispatching Telegram notification for new event: $name")
+                    }
+
+                    try {
+                        notificationService.sendNewEventNotification(newEvent)
+                        newEvent.isCreatedNotified = true
+                        eventRepository.save(newEvent)
+                        logger.info("Set event as created-notified after successful notification: $name")
+                    } catch (e: Exception) {
+                        logger.error("Failed to send Telegram notification for new event: $name", e)
+                    }
                 }
             }
         } catch (e: Exception) {

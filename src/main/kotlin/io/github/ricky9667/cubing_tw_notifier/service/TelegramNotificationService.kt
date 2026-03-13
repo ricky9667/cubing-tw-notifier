@@ -3,8 +3,10 @@ package io.github.ricky9667.cubing_tw_notifier.service
 import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
+import java.time.Duration
 
 @Service
 class TelegramNotificationService(
@@ -13,7 +15,15 @@ class TelegramNotificationService(
 ) {
     private val logger = LoggerFactory.getLogger(TelegramNotificationService::class.java)
 
-    private val restClient = RestClient.create("https://api.telegram.org")
+    private val requestFactory = SimpleClientHttpRequestFactory().apply {
+        setConnectTimeout(Duration.ofSeconds(5))
+        setReadTimeout(Duration.ofSeconds(5))
+    }
+
+    private val restClient = RestClient.builder()
+        .baseUrl("https://api.telegram.org")
+        .requestFactory(requestFactory)
+        .build()
 
     fun sendNewEventNotification(event: CubingEvent) {
         val text = """

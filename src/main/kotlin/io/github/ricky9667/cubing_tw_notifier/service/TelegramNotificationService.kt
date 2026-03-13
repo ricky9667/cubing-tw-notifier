@@ -8,8 +8,8 @@ import org.springframework.web.client.RestClient
 
 @Service
 class TelegramNotificationService(
-    @Value("\${telegram.bot.token}") private val botToken: String,
-    @Value("\${telegram.chat.id}") private val chatId: String
+    @Value("\${telegram.bot.token:}") private val botToken: String,
+    @Value("\${telegram.chat.id:}") private val chatId: String
 ) {
     private val logger = LoggerFactory.getLogger(TelegramNotificationService::class.java)
 
@@ -43,6 +43,11 @@ class TelegramNotificationService(
     }
 
     private fun sendMessage(text: String) {
+        if (botToken.isBlank() || chatId.isBlank()) {
+            logger.warn("Telegram notification skipped: bot token or chat id is not configured.")
+            return
+        }
+
         try {
             val payload = mapOf(
                 "chat_id" to chatId,

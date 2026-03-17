@@ -29,5 +29,8 @@ class CubingEvent(
     var isCreatedNotified: Boolean = false,
 
     @Column(nullable = false)
-    var isRegistrationNotified: Boolean = false
+    var isRegistrationNotified: Boolean = false,
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
+    var isStartNotified: Boolean = false
 )

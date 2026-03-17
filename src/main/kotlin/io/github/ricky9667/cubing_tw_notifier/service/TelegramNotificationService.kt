@@ -56,6 +56,19 @@ class TelegramNotificationService(
         sendMessage(text)
     }
 
+    fun sendEventStartedNotification(event: CubingEvent) {
+        val text = """
+            🎉 <b>比賽開始了! Event Started!</b>
+
+            🏆 <b>比賽名稱 Name</b>: ${escapeTelegramHtml(event.name)}
+            📅 <b>比賽日期 Date</b>: ${escapeTelegramHtml(event.eventDate)}
+
+            🔗 <a href="${escapeTelegramHtml(event.url)}">查看比賽資訊 View Event Details</a>
+        """.trimIndent()
+
+        sendMessage(text)
+    }
+
     private fun sendMessage(text: String) {
         if (botToken.isBlank() || chatId.isBlank()) {
             logger.warn("Telegram notification skipped: bot token or chat id is not configured.")

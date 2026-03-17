@@ -5,19 +5,23 @@ import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Value
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 @Service
 class EventCrawlerService(
     private val eventRepository: CubingEventRepository,
-    private val notificationService: TelegramNotificationService
+    private val notificationService: TelegramNotificationService,
+    @Value("\${notification.start.zone}") private val startNotificationZoneId: String
 ) {
     private val logger = LoggerFactory.getLogger(EventCrawlerService::class.java)
     private val baseUrl = "https://cubing-tw.net/event"
     private val externalUrls = listOf("worldcubeassociation.org", "cubingchina.com", "maru.tw")
+    private val startNotificationZone: ZoneId = ZoneId.of(startNotificationZoneId)
 
     fun crawlNewEvents() {
         logger.info("Starting crawler pass for cubing-tw events...")
@@ -54,7 +58,8 @@ class EventCrawlerService(
                         continue // Skip to the next event
                     }
 
-                    val isPastEvent = startDate.isBefore(LocalDate.now())
+                    val currentDateAtStartZone = LocalDate.now(startNotificationZone)
+                    val isPastEvent = startDate.isBefore(currentDateAtStartZone)
                     val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
 
                     val newEvent = CubingEvent(

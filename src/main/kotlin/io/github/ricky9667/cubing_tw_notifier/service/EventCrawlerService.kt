@@ -64,7 +64,8 @@ class EventCrawlerService(
                         startDate = startDate,
                         registrationTime = registrationTime,
                         isCreatedNotified = isPastEvent,
-                        isRegistrationNotified = isRegistrationPassed
+                        isRegistrationNotified = isRegistrationPassed,
+                        isStartNotified = isPastEvent
                     )
 
                     eventRepository.save(newEvent)

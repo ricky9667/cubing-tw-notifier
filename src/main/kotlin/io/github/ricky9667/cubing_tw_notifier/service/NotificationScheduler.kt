@@ -37,10 +37,18 @@ class NotificationScheduler(
         for (event in pendingEvents) {
             logger.info("Registration is open for: ${event.name}! Sending notification...")
 
-            notificationService.sendRegistrationOpenNotification(event)
+            try {
+                notificationService.sendRegistrationOpenNotification(event)
 
-            event.isRegistrationNotified = true
-            eventRepository.save(event)
+                event.isRegistrationNotified = true
+                eventRepository.save(event)
+            } catch (exception: Exception) {
+                logger.error(
+                    "Failed to send registration open notification for event '${event.name}' (id=${event.id}). " +
+                            "Will retry on next scheduler run.",
+                    exception
+                )
+            }
         }
     }
 }

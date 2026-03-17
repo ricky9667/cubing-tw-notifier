@@ -9,8 +9,5 @@ import java.time.LocalDateTime
 interface CubingEventRepository : JpaRepository<CubingEvent, Long> {
     fun existsByUrl(url: String): Boolean
 
-    fun findByUrl(url: String): CubingEvent?
-
-    // SELECT * FROM cubing_events WHERE registration_time < ? AND registration_notified = false
     fun findByRegistrationTimeBeforeAndIsRegistrationNotifiedFalse(now: LocalDateTime): List<CubingEvent>
 }

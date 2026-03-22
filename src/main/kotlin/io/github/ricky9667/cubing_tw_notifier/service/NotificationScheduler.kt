@@ -16,7 +16,7 @@ class NotificationScheduler(
     private val crawlerService: EventCrawlerService,
     private val notificationService: TelegramNotificationService,
     private val eventRepository: CubingEventRepository,
-    @Value("\${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String
+    @Value("\${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String,
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 
@@ -57,8 +57,8 @@ class NotificationScheduler(
             } catch (exception: Exception) {
                 logger.error(
                     "Failed to send registration open notification for event '${event.name}' (id=${event.id}). " +
-                            "Will retry on next scheduler run.",
-                    exception
+                        "Will retry on next scheduler run.",
+                    exception,
                 )
             }
         }
@@ -88,19 +88,18 @@ class NotificationScheduler(
             } catch (exception: Exception) {
                 logger.error(
                     "Failed to send event start notification for event '${event.name}' (id=${event.id}). " +
-                            "Will retry on next scheduler run.",
-                    exception
+                        "Will retry on next scheduler run.",
+                    exception,
                 )
             }
         }
     }
 
-    private fun currentDateInNotificationZone(): LocalDate {
-        return try {
+    private fun currentDateInNotificationZone(): LocalDate =
+        try {
             LocalDate.now(ZoneId.of(startNotificationZone))
         } catch (exception: Exception) {
             logger.warn("Invalid notification.start.zone '$startNotificationZone'. Falling back to system default zone.")
             LocalDate.now()
         }
-    }
 }

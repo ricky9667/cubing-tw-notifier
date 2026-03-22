@@ -9,5 +9,5 @@ import org.springframework.scheduling.annotation.EnableScheduling
 class CubingTwNotifierApplication
 
 fun main(args: Array<String>) {
-	runApplication<CubingTwNotifierApplication>(*args)
+    runApplication<CubingTwNotifierApplication>(*args)
 }

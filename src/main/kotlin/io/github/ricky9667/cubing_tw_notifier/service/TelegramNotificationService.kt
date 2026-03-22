@@ -12,38 +12,42 @@ import java.time.Duration
 @Service
 class TelegramNotificationService(
     @Value("\${telegram.bot.token:}") private val botToken: String,
-    @Value("\${telegram.chat.id:}") private val chatId: String
+    @Value("\${telegram.chat.id:}") private val chatId: String,
 ) {
     private val logger = LoggerFactory.getLogger(TelegramNotificationService::class.java)
 
-    private val requestFactory = SimpleClientHttpRequestFactory().apply {
-        setConnectTimeout(Duration.ofSeconds(5))
-        setReadTimeout(Duration.ofSeconds(5))
-    }
+    private val requestFactory =
+        SimpleClientHttpRequestFactory().apply {
+            setConnectTimeout(Duration.ofSeconds(5))
+            setReadTimeout(Duration.ofSeconds(5))
+        }
 
-    private fun escapeTelegramHtml(value: Any?): String =
-        HtmlUtils.htmlEscape(value?.toString() ?: "")
+    private fun escapeTelegramHtml(value: Any?): String = HtmlUtils.htmlEscape(value?.toString() ?: "")
 
-    private val restClient = RestClient.builder()
-        .baseUrl("https://api.telegram.org")
-        .requestFactory(requestFactory)
-        .build()
+    private val restClient =
+        RestClient
+            .builder()
+            .baseUrl("https://api.telegram.org")
+            .requestFactory(requestFactory)
+            .build()
 
     fun sendNewEventNotification(event: CubingEvent) {
-        val text = """
+        val text =
+            """
             📢 <b>有新的比賽了! New Competition Announced!</b>
             
             🏆 <b>比賽名稱 Name</b>: ${escapeTelegramHtml(event.name)}
             📅 <b>比賽日期 Date</b>: ${escapeTelegramHtml(event.eventDate)}
             
             🔗 <a href="${escapeTelegramHtml(event.url)}">查看比賽資訊 View Event Details</a>
-        """.trimIndent()
+            """.trimIndent()
 
         sendMessage(text)
     }
 
     fun sendRegistrationOpenNotification(event: CubingEvent) {
-        val text = """
+        val text =
+            """
             🚨 <b>報名開始了! Registration is Open!</b>
             
             🏆 <b>比賽名稱 Name</b>: ${escapeTelegramHtml(event.name)}            
@@ -51,20 +55,21 @@ class TelegramNotificationService(
             快點開始報名不然要來不及了!
             Hurry up and register before spots fill up!
             🔗 <a href="${escapeTelegramHtml(event.url)}/registration">馬上報名 Register Now</a>
-        """.trimIndent()
+            """.trimIndent()
 
         sendMessage(text)
     }
 
     fun sendEventStartedNotification(event: CubingEvent) {
-        val text = """
+        val text =
+            """
             🎉 <b>比賽開始了! Event Started!</b>
 
             🏆 <b>比賽名稱 Name</b>: ${escapeTelegramHtml(event.name)}
             📅 <b>比賽日期 Date</b>: ${escapeTelegramHtml(event.eventDate)}
 
             🔗 <a href="${escapeTelegramHtml(event.url)}">查看比賽資訊 View Event Details</a>
-        """.trimIndent()
+            """.trimIndent()
 
         sendMessage(text)
     }
@@ -76,13 +81,15 @@ class TelegramNotificationService(
         }
 
         try {
-            val payload = mapOf(
-                "chat_id" to chatId,
-                "text" to text,
-                "parse_mode" to "HTML"
-            )
+            val payload =
+                mapOf(
+                    "chat_id" to chatId,
+                    "text" to text,
+                    "parse_mode" to "HTML",
+                )
 
-            restClient.post()
+            restClient
+                .post()
                 .uri("/bot$botToken/sendMessage")
                 .body(payload)
                 .retrieve()

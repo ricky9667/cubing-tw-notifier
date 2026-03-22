@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    url: jdbc:postgresql://localhost:5432/cubing_events
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   jpa:

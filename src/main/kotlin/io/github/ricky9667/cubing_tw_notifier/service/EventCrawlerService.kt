@@ -1,11 +1,11 @@
 package io.github.ricky9667.cubing_tw_notifier.service
 
-import io.github.ricky9667.cubing_tw_notifier.repository.CubingEventRepository
 import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
+import io.github.ricky9667.cubing_tw_notifier.repository.CubingEventRepository
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -19,7 +19,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 class EventCrawlerService(
     private val eventRepository: CubingEventRepository,
     private val notificationService: TelegramNotificationService,
-    @Value("\${notification.start.zone}") private val startNotificationZoneId: String
+    @Value("\${notification.start.zone}") private val startNotificationZoneId: String,
 ) {
     private val logger = LoggerFactory.getLogger(EventCrawlerService::class.java)
     private val baseUrl = "https://cubing-tw.net/event"
@@ -37,10 +37,12 @@ class EventCrawlerService(
         logger.info("Starting crawler pass for cubing-tw events...")
 
         try {
-            val document = Jsoup.connect(baseUrl)
-                .userAgent("cubing-tw-notifier/1.0")
-                .timeout(10_000)
-                .get()
+            val document =
+                Jsoup
+                    .connect(baseUrl)
+                    .userAgent("cubing-tw-notifier/1.0")
+                    .timeout(10_000)
+                    .get()
 
             val eventElements = document.select("div#nav-tabContent div.d-none.d-sm-block tbody tr")
 
@@ -73,16 +75,17 @@ class EventCrawlerService(
                     val isPastEvent = !shouldNotifyNewEvent
                     val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
 
-                    val newEvent = CubingEvent(
-                        url = eventUrl,
-                        name = name,
-                        eventDate = rawEventDate,
-                        startDate = startDate,
-                        registrationTime = registrationTime,
-                        isCreatedNotified = isPastEvent,
-                        isRegistrationNotified = isRegistrationPassed,
-                        isStartNotified = isPastEvent
-                    )
+                    val newEvent =
+                        CubingEvent(
+                            url = eventUrl,
+                            name = name,
+                            eventDate = rawEventDate,
+                            startDate = startDate,
+                            registrationTime = registrationTime,
+                            isCreatedNotified = isPastEvent,
+                            isRegistrationNotified = isRegistrationPassed,
+                            isStartNotified = isPastEvent,
+                        )
 
                     eventRepository.save(newEvent)
                     logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
@@ -107,8 +110,8 @@ class EventCrawlerService(
         }
     }
 
-    private fun extractStartDate(rawDate: String): LocalDate? {
-        return try {
+    private fun extractStartDate(rawDate: String): LocalDate? =
+        try {
             // Looks for exactly 4 digits, a slash, 2 digits, a slash, 2 digits (e.g., 2026/03/14)
             val regex = "^(\\d{4}/\\d{2}/\\d{2})".toRegex()
             val match = regex.find(rawDate)
@@ -122,7 +125,6 @@ class EventCrawlerService(
         } catch (e: Exception) {
             null
         }
-    }
 
     private fun fetchRegistrationTime(eventUrl: String): LocalDateTime? {
         val registrationUrl = "$eventUrl/registration"
@@ -140,14 +142,15 @@ class EventCrawlerService(
         val reopenElements = document.select("p:contains(重新開放報名時間：)")
         val validReopenElement = reopenElements.firstOrNull { it.parent()?.tagName() != "s" }
 
-        val timeText = if (validReopenElement != null) {
-            validReopenElement.text() // e.g., "第二次重新開放報名時間：2025/12/04 (四) 20:00:00 ~ ..."
-        } else {
-            // Step 2: Fallback to the standard Registration Date
-            // Find the <h3> header containing "報名時間", and grab the next <p> sibling
-            val headerElement = document.selectFirst("h3:contains(報名時間)")
-            headerElement?.nextElementSibling()?.text() // e.g., "2025/11/25 (二) 20:00:00 ~ ..."
-        }
+        val timeText =
+            if (validReopenElement != null) {
+                validReopenElement.text() // e.g., "第二次重新開放報名時間：2025/12/04 (四) 20:00:00 ~ ..."
+            } else {
+                // Step 2: Fallback to the standard Registration Date
+                // Find the <h3> header containing "報名時間", and grab the next <p> sibling
+                val headerElement = document.selectFirst("h3:contains(報名時間)")
+                headerElement?.nextElementSibling()?.text() // e.g., "2025/11/25 (二) 20:00:00 ~ ..."
+            }
 
         if (timeText.isNullOrBlank()) {
             logger.warn("Could not find any registration time text on the page.")

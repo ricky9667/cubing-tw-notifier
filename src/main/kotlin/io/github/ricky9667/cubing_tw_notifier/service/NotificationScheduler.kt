@@ -3,6 +3,8 @@ package io.github.ricky9667.cubing_tw_notifier.service
 import io.github.ricky9667.cubing_tw_notifier.repository.CubingEventRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -17,6 +19,12 @@ class NotificationScheduler(
     @Value("\${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
+
+    @EventListener(ApplicationReadyEvent::class)
+    fun runOnStartup() {
+        logger.info("🚀 Application fully booted! Running initial cold-start crawl...")
+        crawlerService.crawlNewEvents()
+    }
 
     // Run the crawler every hour (Cron format: Top of every hour)
     @Scheduled(cron = "0 0 * * * *")

@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "4.0.3"
-    id("io.spring.dependency-management") version "1.1.7"
-    kotlin("plugin.jpa") version "2.2.21"
-    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+    alias(libs.plugins.kotlinJpa)
+    alias(libs.plugins.gradleKtlint)
 }
 
 group = "io.github.ricky9667"
@@ -22,19 +22,20 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("org.jsoup:jsoup:1.22.1")
+    implementation(libs.springBootStarterDataJpa)
+    implementation(libs.springBootStarterWebmvc)
+    implementation(libs.kotlinReflect)
+    implementation(libs.jacksonModuleKotlin)
+    implementation(libs.jsoup)
 
-    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-    runtimeOnly("org.postgresql:postgresql")
+    developmentOnly(libs.springBootDockerCompose)
+    runtimeOnly(libs.postgresql)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.springBootStarterDataJpaTest)
+    testImplementation(libs.springBootStarterWebmvcTest)
+    testImplementation(libs.kotlinTestJunit5)
+    testRuntimeOnly(libs.junitPlatformLauncher)
+    testRuntimeOnly(libs.h2)
 }
 
 kotlin {
@@ -50,7 +51,7 @@ allOpen {
 }
 
 ktlint {
-    version.set("1.7.1")
+    version.set(libs.versions.ktlintCli)
 }
 
 tasks.withType<Test> {

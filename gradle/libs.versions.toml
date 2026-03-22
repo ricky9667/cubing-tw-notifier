@@ -1,5 +1,6 @@
 [versions]
 gradleKtlint = "12.3.0"
+jda = "6.3.2"
 jsoup = "1.22.1"
 kotlin = "2.2.21"
 ktlintCli = "1.7.1"
@@ -7,11 +8,12 @@ springBoot = "4.0.3"
 springDependencyManagement = "1.1.7"
 
 [libraries]
-jacksonModuleKotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 h2 = { module = "com.h2database:h2" }
+jacksonModuleKotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 kotlinTestJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 postgresql = { module = "org.postgresql:postgresql" }
 springBootDockerCompose = { module = "org.springframework.boot:spring-boot-docker-compose" }

@@ -59,7 +59,8 @@ class EventCrawlerService(
                     }
 
                     val currentDateAtStartZone = LocalDate.now(startNotificationZone)
-                    val isPastEvent = startDate.isBefore(currentDateAtStartZone)
+                    val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
+                    val isPastEvent = !shouldNotifyNewEvent
                     val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
 
                     val newEvent = CubingEvent(
@@ -76,17 +77,16 @@ class EventCrawlerService(
                     eventRepository.save(newEvent)
                     logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
 
-                    if (!isPastEvent) {
+                    if (shouldNotifyNewEvent) {
                         logger.info("Dispatching Telegram notification for new event: $name")
-                    }
-
-                    try {
-                        notificationService.sendNewEventNotification(newEvent)
-                        newEvent.isCreatedNotified = true
-                        eventRepository.save(newEvent)
-                        logger.info("Set event as created-notified after successful notification: $name")
-                    } catch (e: Exception) {
-                        logger.error("Failed to send Telegram notification for new event: $name", e)
+                        try {
+                            notificationService.sendNewEventNotification(newEvent)
+                            newEvent.isCreatedNotified = true
+                            eventRepository.save(newEvent)
+                            logger.info("Set event as created-notified after successful notification: $name")
+                        } catch (e: Exception) {
+                            logger.error("Failed to send Telegram notification for new event: $name", e)
+                        }
                     }
                 }
             }

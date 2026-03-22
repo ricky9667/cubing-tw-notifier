@@ -11,7 +11,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@OptIn(ExperimentalAtomicApi::class)
 @Service
 class EventCrawlerService(
     private val eventRepository: CubingEventRepository,
@@ -23,7 +26,14 @@ class EventCrawlerService(
     private val externalUrls = listOf("worldcubeassociation.org", "cubingchina.com", "maru.tw")
     private val startNotificationZone: ZoneId = ZoneId.of(startNotificationZoneId)
 
+    private val isCrawling = AtomicBoolean(false)
+
     fun crawlNewEvents() {
+        if (!isCrawling.compareAndSet(expectedValue = false, newValue = true)) {
+            logger.info("⚠️ Crawl skipped: Another crawl operation is currently in progress.")
+            return
+        }
+
         logger.info("Starting crawler pass for cubing-tw events...")
 
         try {
@@ -92,6 +102,8 @@ class EventCrawlerService(
             }
         } catch (e: Exception) {
             logger.error("Error occurred while crawling events: ${e.message}", e)
+        } finally {
+            isCrawling.store(false)
         }
     }
 

@@ -33,18 +33,21 @@ class DiscordCommandListener(
                 val subscription = DiscordSubscription(guildId = guildId, channelId = channelId)
 
                 if (subscriptionRepository.existsById(guildId)) {
+                    // Overwrite the existing subscription to point to the current channel
+                    subscriptionRepository.save(subscription)
+                    logger.info("🔁 Updated subscription for guild $guildId to channel $channelId.")
                     event
-                        .reply("⚠️ Cubing TW Notifier is currently used in another channel in this server.")
-                        .setEphemeral(true)
+                        .reply(
+                            "⚠️ Cubing TW Notifier was already configured in another channel. The subscription has been updated so this channel will now receive updates from Cubing TW.",
+                        ).setEphemeral(true)
+                        .queue()
+                } else {
+                    subscriptionRepository.save(subscription)
+                    logger.info("✅ Discord service with guild: $guildId and channel: $channelId subscribed to Cubing TW Notifier.")
+                    event
+                        .reply("✅ Your channel will receive updates from Cubing TW.")
                         .queue()
                 }
-                subscriptionRepository.save(subscription)
-
-                logger.info("✅ Discord service with guild: $guildId and channel: $channelId subscribed to Cubing TW Notifier.")
-
-                event
-                    .reply("✅ Your channel will receive updates from Cubing TW.")
-                    .queue()
             }
 
             DiscordCommand.UNSUBSCRIBE.eventName -> {
@@ -52,9 +55,14 @@ class DiscordCommandListener(
                     subscriptionRepository.deleteById(guildId)
 
                     logger.info("🗑️ Removed subscription for guild $guildId")
-                    event.reply("✅ Successfully unsubscribed. This server will no longer receive WCA alerts.").queue()
+                    event
+                        .reply("✅ Successfully unsubscribed. This server will no longer receive WCA alerts.")
+                        .queue()
                 } else {
-                    event.reply("⚠️ This server is not currently subscribed to any alerts.").setEphemeral(true).queue()
+                    event
+                        .reply("⚠️ This server is not currently subscribed to any alerts.")
+                        .setEphemeral(true)
+                        .queue()
                 }
             }
 

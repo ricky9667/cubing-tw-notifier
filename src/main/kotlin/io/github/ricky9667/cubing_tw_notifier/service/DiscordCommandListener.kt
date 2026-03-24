@@ -74,6 +74,10 @@ class DiscordCommandListener(
 
             else -> {
                 logger.warn("⚠️ Unknown command ${event.name}")
+                event
+                    .reply("❌ Unknown command: `${event.name}`.")
+                    .setEphemeral(true)
+                    .queue()
             }
         }
     }

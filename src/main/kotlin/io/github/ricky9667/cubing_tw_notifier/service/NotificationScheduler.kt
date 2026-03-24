@@ -14,7 +14,7 @@ import java.time.ZoneId
 @Component
 class NotificationScheduler(
     private val crawlerService: EventCrawlerService,
-    private val notificationService: TelegramNotificationService,
+    private val notificationServices: List<EventNotificationService>,
     private val eventRepository: CubingEventRepository,
     @Value("\${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String,
 ) {
@@ -50,7 +50,9 @@ class NotificationScheduler(
             logger.info("Registration is open for: ${event.name}! Sending notification...")
 
             try {
-                notificationService.sendRegistrationOpenNotification(event)
+                notificationServices.forEach { service ->
+                    service.notifyRegistrationOpen(event)
+                }
 
                 event.isRegistrationNotified = true
                 eventRepository.save(event)
@@ -81,8 +83,9 @@ class NotificationScheduler(
             logger.info("Event starts today: ${event.name}. Sending start notification...")
 
             try {
-                notificationService.sendEventStartedNotification(event)
-
+                notificationServices.forEach { service ->
+                    service.notifyEventStart(event)
+                }
                 event.isStartNotified = true
                 eventRepository.save(event)
             } catch (exception: Exception) {

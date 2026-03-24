@@ -13,7 +13,7 @@ import java.time.Duration
 class TelegramNotificationService(
     @Value("\${telegram.bot.token:}") private val botToken: String,
     @Value("\${telegram.chat.id:}") private val chatId: String,
-) {
+) : EventNotificationService {
     private val logger = LoggerFactory.getLogger(TelegramNotificationService::class.java)
 
     private val requestFactory =
@@ -31,7 +31,7 @@ class TelegramNotificationService(
             .requestFactory(requestFactory)
             .build()
 
-    fun sendNewEventNotification(event: CubingEvent) {
+    override fun notifyNewEvent(event: CubingEvent) {
         val text =
             """
             📢 <b>有新的比賽了! New Competition Announced!</b>
@@ -45,7 +45,7 @@ class TelegramNotificationService(
         sendMessage(text)
     }
 
-    fun sendRegistrationOpenNotification(event: CubingEvent) {
+    override fun notifyRegistrationOpen(event: CubingEvent) {
         val text =
             """
             🚨 <b>報名開始了! Registration is Open!</b>
@@ -60,7 +60,7 @@ class TelegramNotificationService(
         sendMessage(text)
     }
 
-    fun sendEventStartedNotification(event: CubingEvent) {
+    override fun notifyEventStart(event: CubingEvent) {
         val text =
             """
             🎉 <b>比賽開始了! Event Started!</b>

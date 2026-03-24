@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.springBootStarterWebmvc)
     implementation(libs.kotlinReflect)
     implementation(libs.jacksonModuleKotlin)
+    implementation(libs.jda)
     implementation(libs.jsoup)
 
     developmentOnly(libs.springBootDockerCompose)

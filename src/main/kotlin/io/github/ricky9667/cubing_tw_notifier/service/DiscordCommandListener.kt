@@ -17,13 +17,19 @@ class DiscordCommandListener(
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         if (event.member?.hasPermission(Permission.MANAGE_SERVER) != true) {
-            event.reply("❌ You must be an Administrator to use this command.").setEphemeral(true).queue()
+            event
+                .reply("❌ You must have the \"Manage Server\" permission to use this command.")
+                .setEphemeral(true)
+                .queue()
             return
         }
 
         val guildId = event.guild?.id
         if (guildId == null) {
-            event.reply("❌ This command can only be used inside a server.").setEphemeral(true).queue()
+            event
+                .reply("❌ This command can only be used inside a server.")
+                .setEphemeral(true)
+                .queue()
             return
         }
 

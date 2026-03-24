@@ -47,7 +47,6 @@ class DiscordNotificationService(
         }
     }
 
-
     override fun notifyNewEvent(event: CubingEvent) {
         val text =
             """

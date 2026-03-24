@@ -46,6 +46,7 @@ class DiscordCommandListener(
                     .reply("✅ Your channel will receive updates from Cubing TW.")
                     .queue()
             }
+
             DiscordCommand.UNSUBSCRIBE.eventName -> {
                 if (subscriptionRepository.existsById(guildId)) {
                     subscriptionRepository.deleteById(guildId)
@@ -56,6 +57,7 @@ class DiscordCommandListener(
                     event.reply("⚠️ This server is not currently subscribed to any alerts.").setEphemeral(true).queue()
                 }
             }
+
             else -> {
                 logger.warn("⚠️ Unknown command ${event.name}")
             }

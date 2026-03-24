@@ -8,8 +8,8 @@ plugins {
 }
 
 group = "io.github.ricky9667"
-version = "0.0.1-SNAPSHOT"
-description = "Demo project for Spring Boot"
+version = "1.0.0"
+description = "A notifier bot that checks for updates from Cubing TW website."
 
 java {
     toolchain {

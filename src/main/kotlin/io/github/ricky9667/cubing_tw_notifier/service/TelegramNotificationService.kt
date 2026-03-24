@@ -11,8 +11,8 @@ import java.time.Duration
 
 @Service
 class TelegramNotificationService(
-    @Value("\${telegram.bot.token:}") private val botToken: String,
-    @Value("\${telegram.chat.id:}") private val chatId: String,
+    @Value($$"${telegram.bot.token:}") private val botToken: String,
+    @Value($$"${telegram.chat.id:}") private val chatId: String,
 ) : EventNotificationService {
     private val logger = LoggerFactory.getLogger(TelegramNotificationService::class.java)
 

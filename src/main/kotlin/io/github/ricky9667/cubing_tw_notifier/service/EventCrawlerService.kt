@@ -19,7 +19,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 class EventCrawlerService(
     private val eventRepository: CubingEventRepository,
     private val notificationServices: List<EventNotificationService>,
-    @Value("\${notification.start.zone}") private val startNotificationZoneId: String,
+    @Value($$"${notification.start.zone}") private val startNotificationZoneId: String,
 ) {
     private val logger = LoggerFactory.getLogger(EventCrawlerService::class.java)
     private val baseUrl = "https://cubing-tw.net/event"

@@ -16,7 +16,7 @@ class NotificationScheduler(
     private val crawlerService: EventCrawlerService,
     private val notificationServices: List<EventNotificationService>,
     private val eventRepository: CubingEventRepository,
-    @Value("\${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String,
+    @Value($$"${notification.start.zone:Asia/Taipei}") private val startNotificationZone: String,
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 

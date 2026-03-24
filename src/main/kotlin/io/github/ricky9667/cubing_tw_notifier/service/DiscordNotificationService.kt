@@ -1,5 +1,6 @@
 package io.github.ricky9667.cubing_tw_notifier.service
 
+import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
 import io.github.ricky9667.cubing_tw_notifier.repository.DiscordSubscriptionRepository
 import jakarta.annotation.PostConstruct
 import net.dv8tion.jda.api.JDA
@@ -14,7 +15,7 @@ class DiscordNotificationService(
     @Value("\${discord.bot.token}") private val botToken: String,
     private val subscriptionRepository: DiscordSubscriptionRepository,
     private val commandListener: DiscordCommandListener, // Inject our new listener
-) {
+) : EventNotificationService {
     private val logger = LoggerFactory.getLogger(DiscordNotificationService::class.java)
     private lateinit var jda: JDA
 
@@ -26,7 +27,6 @@ class DiscordNotificationService(
         }
 
         try {
-            // Boot the bot and attach our listener
             jda =
                 JDABuilder
                     .createDefault(botToken)
@@ -34,7 +34,6 @@ class DiscordNotificationService(
                     .build()
                     .awaitReady()
 
-            // Tell Discord's API that this bot has a "/setchannel" command
             jda
                 .updateCommands()
                 .addCommands(
@@ -47,8 +46,51 @@ class DiscordNotificationService(
         }
     }
 
-    // The new Multi-Tenant Broadcast function
-    fun broadcastEventNotification(message: String) {
+
+    override fun notifyNewEvent(event: CubingEvent) {
+        val text =
+            """
+            📢 **有新的比賽了! New Competition Announced!**
+            
+            🏆 **比賽名稱 Name**: ${event.name}
+            📅 **比賽日期 Date**: ${event.eventDate}
+            
+            🔗 [查看比賽資訊 View Event Details](${event.url})
+            """.trimIndent()
+
+        broadcastMessage(text)
+    }
+
+    override fun notifyRegistrationOpen(event: CubingEvent) {
+        val text =
+            """
+            🚨 **報名開始了! Registration is Open!**
+            
+            🏆 **比賽名稱 Name**: ${event.name}            
+            
+            快點開始報名不然要來不及了!
+            Hurry up and register before spots fill up!
+            🔗 [馬上報名 Register Now](${event.url}/registration)
+            """.trimIndent()
+
+        broadcastMessage(text)
+    }
+
+    override fun notifyEventStart(event: CubingEvent) {
+        val text =
+            """
+            🎉 **比賽開始了! Event Started!**
+
+            🏆 **比賽名稱 Name**: ${event.name}
+            📅 **比賽日期 Date**: ${event.eventDate}
+
+            🔗 [查看比賽資訊 View Event Details](${event.url})
+            """.trimIndent()
+
+        broadcastMessage(text)
+    }
+
+    private fun broadcastMessage(message: String) {
         if (!this::jda.isInitialized) return
 
         val subscriptions = subscriptionRepository.findAll()
@@ -65,7 +107,7 @@ class DiscordNotificationService(
 
             if (channel != null) {
                 channel.sendMessage(message).queue(
-                    null, // Success callback (optional)
+                    null,
                     { error -> logger.error("❌ Failed to send to channel ${sub.channelId}", error) },
                 )
             } else {

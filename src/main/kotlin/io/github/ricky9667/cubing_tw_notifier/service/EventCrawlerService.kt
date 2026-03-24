@@ -18,7 +18,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 @Service
 class EventCrawlerService(
     private val eventRepository: CubingEventRepository,
-    private val notificationService: TelegramNotificationService,
+    private val telegramNotificationService: TelegramNotificationService,
     @Value("\${notification.start.zone}") private val startNotificationZoneId: String,
 ) {
     private val logger = LoggerFactory.getLogger(EventCrawlerService::class.java)
@@ -93,7 +93,7 @@ class EventCrawlerService(
                     if (shouldNotifyNewEvent) {
                         logger.info("Dispatching Telegram notification for new event: $name")
                         try {
-                            notificationService.sendNewEventNotification(newEvent)
+                            telegramNotificationService.sendNewEventNotification(newEvent)
                             newEvent.isCreatedNotified = true
                             eventRepository.save(newEvent)
                             logger.info("Set event as created-notified after successful notification: $name")

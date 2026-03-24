@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DiscordNotificationService(
-    @Value($$"${discord.bot.token}") private val botToken: String,
+    @Value("\${discord.bot.token}") private val botToken: String,
     private val subscriptionRepository: DiscordSubscriptionRepository,
     private val commandListener: DiscordCommandListener, // Inject our new listener
 ) : EventNotificationService {

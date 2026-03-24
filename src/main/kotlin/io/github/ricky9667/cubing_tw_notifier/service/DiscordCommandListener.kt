@@ -1,5 +1,6 @@
 package io.github.ricky9667.cubing_tw_notifier.service
 
+import io.github.ricky9667.cubing_tw_notifier.domain.DiscordCommand
 import io.github.ricky9667.cubing_tw_notifier.domain.DiscordSubscription
 import io.github.ricky9667.cubing_tw_notifier.repository.DiscordSubscriptionRepository
 import net.dv8tion.jda.api.Permission
@@ -15,29 +16,49 @@ class DiscordCommandListener(
     private val logger = LoggerFactory.getLogger(DiscordCommandListener::class.java)
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
-        if (event.name != "setchannel") return
-
         if (event.member?.hasPermission(Permission.MANAGE_SERVER) != true) {
             event.reply("❌ You must be an Administrator to use this command.").setEphemeral(true).queue()
             return
         }
 
         val guildId = event.guild?.id
-        val channelId = event.channel.id
-
-        if (guildId != null) {
-            // Save or update the database
-            val subscription = DiscordSubscription(guildId = guildId, channelId = channelId)
-            subscriptionRepository.save(subscription)
-
-            logger.info("✅ Bound bot to channel $channelId in guild $guildId")
-
-            // Reply to the user so they know it worked
-            event
-                .reply("✅ Awesome! I will send all future WCA Taiwan competition alerts to this channel.")
-                .queue()
-        } else {
+        if (guildId == null) {
             event.reply("❌ This command can only be used inside a server.").setEphemeral(true).queue()
+            return
+        }
+
+        val channelId = event.channel.id
+        when (event.name) {
+            DiscordCommand.SUBSCRIBE.eventName -> {
+                val subscription = DiscordSubscription(guildId = guildId, channelId = channelId)
+
+                if (subscriptionRepository.existsById(guildId)) {
+                    event
+                        .reply("⚠️ Cubing TW Notifier is currently used in another channel in this server.")
+                        .setEphemeral(true)
+                        .queue()
+                }
+                subscriptionRepository.save(subscription)
+
+                logger.info("✅ Discord service with guild: $guildId and channel: $channelId subscribed to Cubing TW Notifier.")
+
+                event
+                    .reply("✅ Your channel will receive updates from Cubing TW.")
+                    .queue()
+            }
+            DiscordCommand.UNSUBSCRIBE.eventName -> {
+                if (subscriptionRepository.existsById(guildId)) {
+                    subscriptionRepository.deleteById(guildId)
+
+                    logger.info("🗑️ Removed subscription for guild $guildId")
+                    event.reply("✅ Successfully unsubscribed. This server will no longer receive WCA alerts.").queue()
+                } else {
+                    event.reply("⚠️ This server is not currently subscribed to any alerts.").setEphemeral(true).queue()
+                }
+            }
+            else -> {
+                logger.warn("⚠️ Unknown command ${event.name}")
+            }
         }
     }
 }

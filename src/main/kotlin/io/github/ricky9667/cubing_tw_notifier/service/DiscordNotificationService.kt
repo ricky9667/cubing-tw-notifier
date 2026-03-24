@@ -1,6 +1,7 @@
 package io.github.ricky9667.cubing_tw_notifier.service
 
 import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
+import io.github.ricky9667.cubing_tw_notifier.domain.DiscordCommand
 import io.github.ricky9667.cubing_tw_notifier.repository.DiscordSubscriptionRepository
 import jakarta.annotation.PostConstruct
 import net.dv8tion.jda.api.JDA
@@ -34,11 +35,11 @@ class DiscordNotificationService(
                     .build()
                     .awaitReady()
 
+            val commands = DiscordCommand.entries.map { Commands.slash(it.eventName, it.description) }
             jda
                 .updateCommands()
-                .addCommands(
-                    Commands.slash("setchannel", "Set this channel to receive cubing competition alerts"),
-                ).queue()
+                .addCommands(commands)
+                .queue()
 
             logger.info("✅ Discord Bot connected and commands registered!")
         } catch (e: Exception) {
@@ -65,7 +66,6 @@ class DiscordNotificationService(
         val text =
             """
             🚨 **報名開始了! Registration is Open!**
-            
             🏆 **比賽名稱 Name**: ${event.name}            
             
             快點開始報名不然要來不及了!

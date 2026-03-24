@@ -110,7 +110,10 @@ class DiscordNotificationService(
                     { error -> logger.error("❌ Failed to send to channel ${sub.channelId}", error) },
                 )
             } else {
-                logger.warn("⚠️ Could not find channel ${sub.channelId}. The bot might lack permissions or the channel was deleted.")
+                logger.warn(
+                    "⚠️ Could not find channel ${sub.channelId}. The bot might lack permissions or the channel was deleted. Removing stale subscription.",
+                )
+                subscriptionRepository.delete(sub)
             }
         }
     }

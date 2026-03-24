@@ -93,7 +93,7 @@ class EventCrawlerService(
                     if (shouldNotifyNewEvent) {
                         logger.info("Dispatching Telegram notification for new event: $name")
                         try {
-                            telegramNotificationService.sendNewEventNotification(newEvent)
+                            telegramNotificationService.notifyNewEvent(newEvent)
                             newEvent.isCreatedNotified = true
                             eventRepository.save(newEvent)
                             logger.info("Set event as created-notified after successful notification: $name")

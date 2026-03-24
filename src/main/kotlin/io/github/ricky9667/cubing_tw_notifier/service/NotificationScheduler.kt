@@ -50,7 +50,7 @@ class NotificationScheduler(
             logger.info("Registration is open for: ${event.name}! Sending notification...")
 
             try {
-                telegramNotificationService.sendRegistrationOpenNotification(event)
+                telegramNotificationService.notifyRegistrationOpen(event)
 
                 event.isRegistrationNotified = true
                 eventRepository.save(event)
@@ -81,7 +81,7 @@ class NotificationScheduler(
             logger.info("Event starts today: ${event.name}. Sending start notification...")
 
             try {
-                telegramNotificationService.sendEventStartedNotification(event)
+                telegramNotificationService.notifyEventStart(event)
 
                 event.isStartNotified = true
                 eventRepository.save(event)

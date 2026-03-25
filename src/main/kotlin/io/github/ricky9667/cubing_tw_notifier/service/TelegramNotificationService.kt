@@ -63,7 +63,7 @@ class TelegramNotificationService(
     override fun notifyEventStart(event: CubingEvent) {
         val text =
             """
-            🎉 <b>比賽開始了! Event Started!</b>
+            🎉 <b>報名即將開始! Registration will begin soon!</b>
 
             🏆 <b>比賽名稱 Name</b>: ${escapeTelegramHtml(event.name)}
             📅 <b>比賽日期 Date</b>: ${escapeTelegramHtml(event.eventDate)}

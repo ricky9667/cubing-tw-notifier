@@ -64,11 +64,9 @@ class DiscordNotificationService(
     override fun notifyRegistrationOpen(event: CubingEvent) {
         val text =
             """
-            🚨 **報名開始了! Registration is Open!**
-            🏆 **比賽名稱 Name**: ${event.name}            
+            🚨 **報名即將開始! Registration will begin soon!**
             
-            快點開始報名不然要來不及了!
-            Hurry up and register before spots fill up!
+            🏆 **比賽名稱 Name**: ${event.name}            
             🔗 [馬上報名 Register Now](${event.url}/registration)
             """.trimIndent()
 
@@ -78,7 +76,7 @@ class DiscordNotificationService(
     override fun notifyEventStart(event: CubingEvent) {
         val text =
             """
-            🎉 **比賽開始了! Event Started!**
+            🎉 **比賽即將開始! Event is starting soon!**
 
             🏆 **比賽名稱 Name**: ${event.name}
             📅 **比賽日期 Date**: ${event.eventDate}

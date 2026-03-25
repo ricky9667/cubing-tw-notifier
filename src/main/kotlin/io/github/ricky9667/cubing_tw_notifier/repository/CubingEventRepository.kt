@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 interface CubingEventRepository : JpaRepository<CubingEvent, Long> {
     fun existsByUrl(url: String): Boolean
 
-    fun findByRegistrationTimeBeforeAndIsRegistrationNotifiedFalse(now: LocalDateTime): List<CubingEvent>
+    fun findByRegistrationTimeLessThanEqualAndIsRegistrationNotifiedFalse(registrationTime: LocalDateTime): List<CubingEvent>
 
     fun findByStartDateAndIsStartNotifiedFalse(startDate: LocalDate): List<CubingEvent>
 }

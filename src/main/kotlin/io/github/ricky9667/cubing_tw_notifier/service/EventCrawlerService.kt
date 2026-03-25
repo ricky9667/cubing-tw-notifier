@@ -74,8 +74,6 @@ class EventCrawlerService(
                     val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
                     val isPastEvent = !shouldNotifyNewEvent
                     val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
-                    val isOneDayBeforeStartPassed = !startDate.isAfter(currentDateAtStartZone)
-
                     val newEvent =
                         CubingEvent(
                             url = eventUrl,
@@ -85,7 +83,6 @@ class EventCrawlerService(
                             registrationTime = registrationTime,
                             isCreatedNotified = isPastEvent,
                             isRegistrationNotified = isRegistrationPassed,
-                            isOneDayBeforeStartNotified = isOneDayBeforeStartPassed,
                             isStartNotified = isPastEvent,
                         )
 

@@ -12,7 +12,5 @@ interface CubingEventRepository : JpaRepository<CubingEvent, Long> {
 
     fun findByRegistrationTimeLessThanEqualAndIsRegistrationNotifiedFalse(registrationTime: LocalDateTime): List<CubingEvent>
 
-    fun findByStartDateAndIsOneDayBeforeStartNotifiedFalse(startDate: LocalDate): List<CubingEvent>
-
     fun findByStartDateAndIsStartNotifiedFalse(startDate: LocalDate): List<CubingEvent>
 }

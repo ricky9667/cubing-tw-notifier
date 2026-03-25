@@ -29,5 +29,7 @@ class CubingEvent(
     @Column(nullable = false)
     var isRegistrationNotified: Boolean = false,
     @Column(nullable = false, columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
+    var isOneDayBeforeStartNotified: Boolean = false,
+    @Column(nullable = false, columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
     var isStartNotified: Boolean = false,
 )

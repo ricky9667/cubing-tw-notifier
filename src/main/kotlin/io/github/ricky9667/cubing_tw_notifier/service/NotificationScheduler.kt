@@ -39,7 +39,7 @@ class NotificationScheduler(
         logger.info("⏰ Checking for newly opened registrations...")
 
         val now = LocalDateTime.now()
-        val pendingEvents = eventRepository.findByRegistrationTimeBeforeAndIsRegistrationNotifiedFalse(now)
+        val pendingEvents = eventRepository.findByRegistrationTimeLessThanEqualAndIsRegistrationNotifiedFalse(now.plusMinutes(5))
 
         if (pendingEvents.isEmpty()) {
             logger.info("No new registrations to announce right now.")
@@ -66,20 +66,39 @@ class NotificationScheduler(
         }
     }
 
-    // Notify at 9 AM local time on each event's first start date.
-    @Scheduled(cron = "0 0 9 * * *", zone = "\${notification.start.zone:Asia/Taipei}")
+    // Notify at 8 AM local time: one day before and on the day of the event.
+    @Scheduled(cron = "0 0 8 * * *", zone = "\${notification.start.zone:Asia/Taipei}")
     fun checkEventStarts() {
-        val notificationDate = currentDateInNotificationZone()
-        logger.info("⏰ Checking for events starting today ($notificationDate) in zone $startNotificationZone...")
+        val today = currentDateInNotificationZone()
+        val tomorrow = today.plusDays(1)
+        logger.info("⏰ Checking for events starting today ($today) or tomorrow ($tomorrow) in zone $startNotificationZone...")
 
-        val pendingEvents = eventRepository.findByStartDateAndIsStartNotifiedFalse(notificationDate)
+        val dayBeforeEvents = eventRepository.findByStartDateAndIsOneDayBeforeStartNotifiedFalse(tomorrow)
+        val todayEvents = eventRepository.findByStartDateAndIsStartNotifiedFalse(today)
 
-        if (pendingEvents.isEmpty()) {
+        if (dayBeforeEvents.isEmpty() && todayEvents.isEmpty()) {
             logger.info("No starting events to announce right now.")
             return
         }
 
-        for (event in pendingEvents) {
+        for (event in dayBeforeEvents) {
+            logger.info("Event starts tomorrow: ${event.name}. Sending one-day-before notification...")
+            try {
+                notificationServices.forEach { service ->
+                    service.notifyEventStart(event)
+                }
+                event.isOneDayBeforeStartNotified = true
+                eventRepository.save(event)
+            } catch (exception: Exception) {
+                logger.error(
+                    "Failed to send one-day-before start notification for event '${event.name}' (id=${event.id}). " +
+                        "Will retry on next scheduler run.",
+                    exception,
+                )
+            }
+        }
+
+        for (event in todayEvents) {
             logger.info("Event starts today: ${event.name}. Sending start notification...")
 
             try {

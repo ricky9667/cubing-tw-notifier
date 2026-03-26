@@ -56,52 +56,11 @@ class EventCrawlerService(
                 val relativeLink = aTag.attr("href")
                 val eventUrl = if (relativeLink.startsWith("http")) relativeLink else "$baseUrl/$relativeLink"
 
-                if (!eventRepository.existsByUrl(eventUrl)) {
-                    logger.info("Found new event: $name. Fetching registration details...")
-
-                    var registrationTime: LocalDateTime? = null
-                    if (externalUrls.none { eventUrl.contains(it) }) {
-                        registrationTime = fetchRegistrationTime(eventUrl)
-                    }
-
-                    val startDate = extractStartDate(rawEventDate)
-                    if (startDate == null) {
-                        logger.error("Skipping event $name due to unparseable date: $rawEventDate")
-                        continue // Skip to the next event
-                    }
-
-                    val currentDateAtStartZone = LocalDate.now(startNotificationZone)
-                    val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
-                    val isPastEvent = !shouldNotifyNewEvent
-                    val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
-                    val newEvent =
-                        CubingEvent(
-                            url = eventUrl,
-                            name = name,
-                            eventDate = rawEventDate,
-                            startDate = startDate,
-                            registrationTime = registrationTime,
-                            isCreatedNotified = isPastEvent,
-                            isRegistrationNotified = isRegistrationPassed,
-                            isStartNotified = isPastEvent,
-                        )
-
-                    eventRepository.save(newEvent)
-                    logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
-
-                    if (shouldNotifyNewEvent) {
-                        logger.info("Dispatching Telegram notification for new event: $name")
-                        try {
-                            notificationServices.forEach { service ->
-                                service.notifyNewEvent(newEvent)
-                            }
-                            newEvent.isCreatedNotified = true
-                            eventRepository.save(newEvent)
-                            logger.info("Set event as created-notified after successful notification: $name")
-                        } catch (e: Exception) {
-                            logger.error("Failed to send Telegram notification for new event: $name", e)
-                        }
-                    }
+                val cubingEvent = eventRepository.findByUrl(eventUrl)
+                if (cubingEvent == null) {
+                    processNewEvent(name, eventUrl, rawEventDate)
+                } else if (externalUrls.none { eventUrl.contains(it) }) {
+                    checkForRegistrationTimeUpdate(cubingEvent)
                 }
             }
         } catch (e: Exception) {
@@ -109,6 +68,75 @@ class EventCrawlerService(
         } finally {
             isCrawling.store(false)
         }
+    }
+
+    private fun processNewEvent(
+        name: String,
+        eventUrl: String,
+        rawEventDate: String,
+    ) {
+        logger.info("Found new event: $name. Fetching registration details...")
+
+        var registrationTime: LocalDateTime? = null
+        if (externalUrls.none { eventUrl.contains(it) }) {
+            registrationTime = fetchRegistrationTime(eventUrl)
+        }
+
+        val startDate = extractStartDate(rawEventDate)
+        if (startDate == null) {
+            logger.error("Skipping event $name due to unparseable date: $rawEventDate")
+            return
+        }
+
+        val currentDateAtStartZone = LocalDate.now(startNotificationZone)
+        val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
+        val isPastEvent = !shouldNotifyNewEvent
+        val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
+        val newEvent =
+            CubingEvent(
+                url = eventUrl,
+                name = name,
+                eventDate = rawEventDate,
+                startDate = startDate,
+                registrationTime = registrationTime,
+                isCreatedNotified = isPastEvent,
+                isRegistrationNotified = isRegistrationPassed,
+                isStartNotified = isPastEvent,
+            )
+
+        eventRepository.save(newEvent)
+        logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
+
+        if (shouldNotifyNewEvent) {
+            logger.info("Dispatching notifications for new event: $name")
+            try {
+                notificationServices.forEach { service ->
+                    service.notifyNewEvent(newEvent)
+                }
+                newEvent.isCreatedNotified = true
+                eventRepository.save(newEvent)
+                logger.info("Set event as created-notified after successful notification: $name")
+            } catch (e: Exception) {
+                logger.error("Failed to send notification for new event: $name", e)
+            }
+        }
+    }
+
+    private fun checkForRegistrationTimeUpdate(cubingEvent: CubingEvent) {
+        val updatedRegistrationTime = fetchRegistrationTime(cubingEvent.url) ?: return
+        if (cubingEvent.registrationTime == updatedRegistrationTime) return
+
+        logger.info(
+            "Registration time updated for '${cubingEvent.name}': ${cubingEvent.registrationTime} -> $updatedRegistrationTime",
+        )
+
+        val now = LocalDateTime.now()
+        cubingEvent.apply {
+            registrationTime = updatedRegistrationTime
+            isRegistrationNotified = updatedRegistrationTime.isBefore(now)
+        }
+        eventRepository.save(cubingEvent)
+        logger.info("Saved updated registration time for event: ${cubingEvent.name}")
     }
 
     private fun extractStartDate(rawDate: String): LocalDate? =

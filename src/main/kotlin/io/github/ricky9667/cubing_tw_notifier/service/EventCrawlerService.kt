@@ -129,8 +129,12 @@ class EventCrawlerService(
         logger.info(
             "Registration time updated for '${cubingEvent.name}': ${cubingEvent.registrationTime} -> $updatedRegistrationTime",
         )
-        cubingEvent.registrationTime = updatedRegistrationTime
-        cubingEvent.isRegistrationNotified = updatedRegistrationTime.isBefore(LocalDateTime.now())
+
+        val now = LocalDateTime.now()
+        cubingEvent.apply {
+            registrationTime = updatedRegistrationTime
+            isRegistrationNotified = updatedRegistrationTime.isBefore(now)
+        }
         eventRepository.save(cubingEvent)
         logger.info("Saved updated registration time for event: ${cubingEvent.name}")
     }

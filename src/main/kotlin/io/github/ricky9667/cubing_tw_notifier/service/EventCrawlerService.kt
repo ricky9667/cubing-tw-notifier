@@ -108,7 +108,7 @@ class EventCrawlerService(
         logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
 
         if (shouldNotifyNewEvent) {
-            logger.info("Dispatching Telegram notification for new event: $name")
+            logger.info("Dispatching notifications for new event: $name")
             try {
                 notificationServices.forEach { service ->
                     service.notifyNewEvent(newEvent)
@@ -117,7 +117,7 @@ class EventCrawlerService(
                 eventRepository.save(newEvent)
                 logger.info("Set event as created-notified after successful notification: $name")
             } catch (e: Exception) {
-                logger.error("Failed to send Telegram notification for new event: $name", e)
+                logger.error("Failed to send notification for new event: $name", e)
             }
         }
     }

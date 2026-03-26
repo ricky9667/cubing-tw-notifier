@@ -58,51 +58,7 @@ class EventCrawlerService(
 
                 val cubingEvent = eventRepository.findByUrl(eventUrl)
                 if (cubingEvent == null) {
-                    logger.info("Found new event: $name. Fetching registration details...")
-
-                    var registrationTime: LocalDateTime? = null
-                    if (externalUrls.none { eventUrl.contains(it) }) {
-                        registrationTime = fetchRegistrationTime(eventUrl)
-                    }
-
-                    val startDate = extractStartDate(rawEventDate)
-                    if (startDate == null) {
-                        logger.error("Skipping event $name due to unparseable date: $rawEventDate")
-                        continue // Skip to the next event
-                    }
-
-                    val currentDateAtStartZone = LocalDate.now(startNotificationZone)
-                    val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
-                    val isPastEvent = !shouldNotifyNewEvent
-                    val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
-                    val newEvent =
-                        CubingEvent(
-                            url = eventUrl,
-                            name = name,
-                            eventDate = rawEventDate,
-                            startDate = startDate,
-                            registrationTime = registrationTime,
-                            isCreatedNotified = isPastEvent,
-                            isRegistrationNotified = isRegistrationPassed,
-                            isStartNotified = isPastEvent,
-                        )
-
-                    eventRepository.save(newEvent)
-                    logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
-
-                    if (shouldNotifyNewEvent) {
-                        logger.info("Dispatching Telegram notification for new event: $name")
-                        try {
-                            notificationServices.forEach { service ->
-                                service.notifyNewEvent(newEvent)
-                            }
-                            newEvent.isCreatedNotified = true
-                            eventRepository.save(newEvent)
-                            logger.info("Set event as created-notified after successful notification: $name")
-                        } catch (e: Exception) {
-                            logger.error("Failed to send Telegram notification for new event: $name", e)
-                        }
-                    }
+                    processNewEvent(name, eventUrl, rawEventDate)
                 } else if (externalUrls.none { eventUrl.contains(it) }) {
                     checkForRegistrationTimeUpdate(cubingEvent)
                 }
@@ -111,6 +67,58 @@ class EventCrawlerService(
             logger.error("Error occurred while crawling events: ${e.message}", e)
         } finally {
             isCrawling.store(false)
+        }
+    }
+
+    private fun processNewEvent(
+        name: String,
+        eventUrl: String,
+        rawEventDate: String,
+    ) {
+        logger.info("Found new event: $name. Fetching registration details...")
+
+        var registrationTime: LocalDateTime? = null
+        if (externalUrls.none { eventUrl.contains(it) }) {
+            registrationTime = fetchRegistrationTime(eventUrl)
+        }
+
+        val startDate = extractStartDate(rawEventDate)
+        if (startDate == null) {
+            logger.error("Skipping event $name due to unparseable date: $rawEventDate")
+            return
+        }
+
+        val currentDateAtStartZone = LocalDate.now(startNotificationZone)
+        val shouldNotifyNewEvent = !startDate.isBefore(currentDateAtStartZone)
+        val isPastEvent = !shouldNotifyNewEvent
+        val isRegistrationPassed = registrationTime?.isBefore(LocalDateTime.now()) ?: isPastEvent
+        val newEvent =
+            CubingEvent(
+                url = eventUrl,
+                name = name,
+                eventDate = rawEventDate,
+                startDate = startDate,
+                registrationTime = registrationTime,
+                isCreatedNotified = isPastEvent,
+                isRegistrationNotified = isRegistrationPassed,
+                isStartNotified = isPastEvent,
+            )
+
+        eventRepository.save(newEvent)
+        logger.info("Saved new event to database: $name (Past Event: $isPastEvent)")
+
+        if (shouldNotifyNewEvent) {
+            logger.info("Dispatching Telegram notification for new event: $name")
+            try {
+                notificationServices.forEach { service ->
+                    service.notifyNewEvent(newEvent)
+                }
+                newEvent.isCreatedNotified = true
+                eventRepository.save(newEvent)
+                logger.info("Set event as created-notified after successful notification: $name")
+            } catch (e: Exception) {
+                logger.error("Failed to send Telegram notification for new event: $name", e)
+            }
         }
     }
 

@@ -102,6 +102,8 @@ class EventCrawlerService(
                             logger.error("Failed to send Telegram notification for new event: $name", e)
                         }
                     }
+                } else if (externalUrls.none { eventUrl.contains(it) }) {
+                    checkForRegistrationTimeUpdate(eventUrl, name)
                 }
             }
         } catch (e: Exception) {
@@ -109,6 +111,24 @@ class EventCrawlerService(
         } finally {
             isCrawling.store(false)
         }
+    }
+
+    private fun checkForRegistrationTimeUpdate(
+        eventUrl: String,
+        name: String,
+    ) {
+        val existingEvent = eventRepository.findByUrl(eventUrl) ?: return
+        val updatedRegistrationTime = fetchRegistrationTime(eventUrl) ?: return
+
+        if (existingEvent.registrationTime == updatedRegistrationTime) return
+
+        logger.info(
+            "Registration time updated for '$name': ${existingEvent.registrationTime} -> $updatedRegistrationTime",
+        )
+        existingEvent.registrationTime = updatedRegistrationTime
+        existingEvent.isRegistrationNotified = updatedRegistrationTime.isBefore(LocalDateTime.now())
+        eventRepository.save(existingEvent)
+        logger.info("Saved updated registration time for event: $name")
     }
 
     private fun extractStartDate(rawDate: String): LocalDate? =

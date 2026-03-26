@@ -56,7 +56,8 @@ class EventCrawlerService(
                 val relativeLink = aTag.attr("href")
                 val eventUrl = if (relativeLink.startsWith("http")) relativeLink else "$baseUrl/$relativeLink"
 
-                if (!eventRepository.existsByUrl(eventUrl)) {
+                val cubingEvent = eventRepository.findByUrl(eventUrl)
+                if (cubingEvent == null) {
                     logger.info("Found new event: $name. Fetching registration details...")
 
                     var registrationTime: LocalDateTime? = null
@@ -103,7 +104,7 @@ class EventCrawlerService(
                         }
                     }
                 } else if (externalUrls.none { eventUrl.contains(it) }) {
-                    checkForRegistrationTimeUpdate(eventUrl, name)
+                    checkForRegistrationTimeUpdate(cubingEvent)
                 }
             }
         } catch (e: Exception) {
@@ -113,22 +114,17 @@ class EventCrawlerService(
         }
     }
 
-    private fun checkForRegistrationTimeUpdate(
-        eventUrl: String,
-        name: String,
-    ) {
-        val existingEvent = eventRepository.findByUrl(eventUrl) ?: return
-        val updatedRegistrationTime = fetchRegistrationTime(eventUrl) ?: return
-
-        if (existingEvent.registrationTime == updatedRegistrationTime) return
+    private fun checkForRegistrationTimeUpdate(cubingEvent: CubingEvent) {
+        val updatedRegistrationTime = fetchRegistrationTime(cubingEvent.url) ?: return
+        if (cubingEvent.registrationTime == updatedRegistrationTime) return
 
         logger.info(
-            "Registration time updated for '$name': ${existingEvent.registrationTime} -> $updatedRegistrationTime",
+            "Registration time updated for '${cubingEvent.name}': ${cubingEvent.registrationTime} -> $updatedRegistrationTime",
         )
-        existingEvent.registrationTime = updatedRegistrationTime
-        existingEvent.isRegistrationNotified = updatedRegistrationTime.isBefore(LocalDateTime.now())
-        eventRepository.save(existingEvent)
-        logger.info("Saved updated registration time for event: $name")
+        cubingEvent.registrationTime = updatedRegistrationTime
+        cubingEvent.isRegistrationNotified = updatedRegistrationTime.isBefore(LocalDateTime.now())
+        eventRepository.save(cubingEvent)
+        logger.info("Saved updated registration time for event: ${cubingEvent.name}")
     }
 
     private fun extractStartDate(rawDate: String): LocalDate? =

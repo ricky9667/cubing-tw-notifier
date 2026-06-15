@@ -658,13 +658,22 @@
       document.documentElement.lang = lang === "zh" ? "zh-Hant" : "en";
 
       document.querySelectorAll("[data-i18n]").forEach((node) => {
-        node.textContent = copy[lang][node.dataset.i18n];
+        const key = node.dataset.i18n;
+        if (copy[lang][key] !== undefined) {
+          node.textContent = copy[lang][key];
+        }
       });
       document.querySelectorAll("[data-i18n-html]").forEach((node) => {
-        node.innerHTML = copy[lang][node.dataset.i18nHtml];
+        const key = node.dataset.i18nHtml;
+        if (copy[lang][key] !== undefined) {
+          node.innerHTML = copy[lang][key];
+        }
       });
       document.querySelectorAll("[data-i18n-aria]").forEach((node) => {
-        node.setAttribute("aria-label", copy[lang][node.dataset.i18nAria]);
+        const key = node.dataset.i18nAria;
+        if (copy[lang][key] !== undefined) {
+          node.setAttribute("aria-label", copy[lang][key]);
+        }
       });
 
       languageToggle.setAttribute("aria-label", copy[lang].langLabel);

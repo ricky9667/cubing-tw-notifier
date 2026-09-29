@@ -6,6 +6,8 @@ import io.github.ricky9667.cubing_tw_notifier.repository.DiscordSubscriptionRepo
 import jakarta.annotation.PostConstruct
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -36,6 +38,9 @@ class DiscordNotificationService(
                     .awaitReady()
 
             val commands = DiscordCommand.entries.map { Commands.slash(it.eventName, it.description) }
+            commands
+                .first { it.name == DiscordCommand.SUBSCRIBE.eventName }
+                .addOption(OptionType.ROLE, "role", "Role to tag in competition alerts", false)
             jda
                 .updateCommands()
                 .addCommands(commands)
@@ -103,7 +108,17 @@ class DiscordNotificationService(
             val channel = jda.getTextChannelById(sub.channelId)
 
             if (channel != null) {
-                channel.sendMessage(message).queue(
+                val role = sub.roleId?.let { channel.guild.getRoleById(it) }
+                val mentionRoleId =
+                    role
+                        ?.takeIf {
+                            !it.isPublicRole &&
+                                (it.isMentionable || channel.guild.selfMember.hasPermission(channel, Permission.MESSAGE_MENTION_EVERYONE))
+                        }?.id
+                val content = if (mentionRoleId != null) "<@&$mentionRoleId>\n$message" else message
+                val action = channel.sendMessage(content).setAllowedMentions(emptySet())
+                if (mentionRoleId != null) action.mentionRoles(mentionRoleId)
+                action.queue(
                     null,
                     { error -> logger.error("❌ Failed to send to channel ${sub.channelId}", error) },
                 )

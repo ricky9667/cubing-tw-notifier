@@ -13,4 +13,6 @@ class DiscordSubscription(
     val guildId: String,
     @Column(name = "channel_id", nullable = false)
     var channelId: String,
+    @Column(name = "role_id")
+    var roleId: String? = null,
 )

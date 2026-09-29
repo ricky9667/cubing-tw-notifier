@@ -24,8 +24,8 @@ class DiscordCommandListener(
             return
         }
 
-        val guildId = event.guild?.id
-        if (guildId == null) {
+        val guild = event.guild
+        if (guild == null) {
             event
                 .reply("❌ This command can only be used inside a server.")
                 .setEphemeral(true)
@@ -33,25 +33,42 @@ class DiscordCommandListener(
             return
         }
 
+        val guildId = guild.id
         val channelId = event.channel.id
         when (event.name) {
             DiscordCommand.SUBSCRIBE.eventName -> {
-                val subscription = DiscordSubscription(guildId = guildId, channelId = channelId)
+                val role = event.getOption("role")?.asRole
+                if (role != null) {
+                    val botCanMentionAll =
+                        guild.selfMember.hasPermission(
+                            event.channel.asGuildMessageChannel(),
+                            Permission.MESSAGE_MENTION_EVERYONE,
+                        )
+                    if (role.isPublicRole || (!role.isMentionable && !botCanMentionAll)) {
+                        event
+                            .reply("❌ The bot cannot tag that role in this channel. Choose a mentionable role.")
+                            .setEphemeral(true)
+                            .queue()
+                        return
+                    }
+                }
+
+                val subscription = DiscordSubscription(guildId = guildId, channelId = channelId, roleId = role?.id)
+                val roleTagStatus = if (role == null) "without role tags" else "with the selected role tagged"
 
                 if (subscriptionRepository.existsById(guildId)) {
-                    // Overwrite the existing subscription to point to the current channel
                     subscriptionRepository.save(subscription)
-                    logger.info("🔁 Updated subscription for guild $guildId to channel $channelId.")
+                    logger.info("🔁 Updated subscription for guild $guildId to channel $channelId and role ${role?.id}.")
                     event
                         .reply(
-                            "⚠️ Cubing TW Notifier was already configured in another channel. The subscription has been updated so this channel will now receive updates from Cubing TW.",
+                            "✅ Subscription updated. This channel will receive Cubing TW alerts $roleTagStatus.",
                         ).setEphemeral(true)
                         .queue()
                 } else {
                     subscriptionRepository.save(subscription)
                     logger.info("✅ Discord service with guild: $guildId and channel: $channelId subscribed to Cubing TW Notifier.")
                     event
-                        .reply("✅ Your channel will receive updates from Cubing TW.")
+                        .reply("✅ This channel will receive Cubing TW alerts $roleTagStatus.")
                         .queue()
                 }
             }

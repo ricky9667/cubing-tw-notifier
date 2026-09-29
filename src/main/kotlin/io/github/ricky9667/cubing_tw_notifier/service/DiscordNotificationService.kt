@@ -1,6 +1,5 @@
 package io.github.ricky9667.cubing_tw_notifier.service
 
-import io.github.ricky9667.cubing_tw_notifier.domain.CubingEvent
 import io.github.ricky9667.cubing_tw_notifier.domain.DiscordCommand
 import io.github.ricky9667.cubing_tw_notifier.repository.DiscordSubscriptionRepository
 import jakarta.annotation.PostConstruct
@@ -52,47 +51,7 @@ class DiscordNotificationService(
         }
     }
 
-    override fun notifyNewEvent(event: CubingEvent) {
-        val text =
-            """
-            📢 **有新的比賽了! New Competition Announced!**
-            
-            🏆 **比賽名稱 Name**: ${event.name}
-            📅 **比賽日期 Date**: ${event.eventDate}
-            
-            🔗 [查看比賽資訊 View Event Details](${event.url})
-            """.trimIndent()
-
-        broadcastMessage(text)
-    }
-
-    override fun notifyRegistrationOpen(event: CubingEvent) {
-        val text =
-            """
-            🚨 **報名即將開始! Registration will begin soon!**
-            
-            🏆 **比賽名稱 Name**: ${event.name}            
-            🔗 [馬上報名 Register Now](${event.url}/registration)
-            """.trimIndent()
-
-        broadcastMessage(text)
-    }
-
-    override fun notifyEventStart(event: CubingEvent) {
-        val text =
-            """
-            🎉 **比賽即將開始! Event is starting soon!**
-
-            🏆 **比賽名稱 Name**: ${event.name}
-            📅 **比賽日期 Date**: ${event.eventDate}
-
-            🔗 [查看比賽資訊 View Event Details](${event.url})
-            """.trimIndent()
-
-        broadcastMessage(text)
-    }
-
-    private fun broadcastMessage(message: String) {
+    override fun sendNotification(message: String) {
         if (!this::jda.isInitialized) return
 
         val subscriptions = subscriptionRepository.findAll()
@@ -115,7 +74,7 @@ class DiscordNotificationService(
                             !it.isPublicRole &&
                                 (it.isMentionable || channel.guild.selfMember.hasPermission(channel, Permission.MESSAGE_MENTION_EVERYONE))
                         }?.id
-                val content = if (mentionRoleId != null) "<@&$mentionRoleId>\n$message" else message
+                val content = if (mentionRoleId != null) "<@&$mentionRoleId>\n\n$message" else message
                 val action = channel.sendMessage(content).setAllowedMentions(emptySet())
                 if (mentionRoleId != null) action.mentionRoles(mentionRoleId)
                 action.queue(

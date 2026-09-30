@@ -8,8 +8,17 @@ plugins {
 }
 
 group = "io.github.ricky9667"
-version = "1.0.0"
-description = "A notifier bot that checks for updates from Cubing TW website."
+version =
+    providers
+        .gradleProperty("releaseVersion")
+        .orElse("dev")
+        .map { it.removePrefix("v") }
+        .get()
+description = "Telegram/Discord bot that checks for updates and registrations from Cubing TW."
+
+springBoot {
+    buildInfo()
+}
 
 java {
     toolchain {

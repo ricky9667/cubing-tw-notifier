@@ -24,6 +24,8 @@ class CubingEvent(
     @Column(nullable = false)
     var startDate: LocalDate, // Extracts just "2025-12-19" for logic/sorting
     var registrationTime: LocalDateTime? = null,
+    @Column(nullable = false, columnDefinition = "integer default 0 check (reopen >= 0)")
+    var reopen: Int = 0,
     @Column(nullable = false)
     var isCreatedNotified: Boolean = false,
     @Column(nullable = false)

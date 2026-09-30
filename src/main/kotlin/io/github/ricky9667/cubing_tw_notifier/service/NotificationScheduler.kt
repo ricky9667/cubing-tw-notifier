@@ -83,7 +83,7 @@ class NotificationScheduler(
             logger.info("Sending event start notification for ${event.name}...")
             try {
                 notificationServices.forEach { service ->
-                    service.notifyEventStart(event)
+                    service.notifyCompetitionStart(event)
                 }
                 event.isStartNotified = true
                 eventRepository.save(event)

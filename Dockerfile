@@ -9,8 +9,9 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY src ./src
 
 # Build the JAR file (skipping tests for faster deployment)
+ARG RELEASE_VERSION=dev
 RUN chmod +x ./gradlew
-RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test \
+RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test -PreleaseVersion="$RELEASE_VERSION" \
     && cp "$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-plain.jar' | head -n 1)" /app/app.jar
 
 # Stage 2: Run the application

@@ -42,10 +42,10 @@ interface EventNotificationService {
         )
     }
 
-    fun notifyEventStart(event: CubingEvent) {
+    fun notifyCompetitionStart(event: CubingEvent) {
         sendNotification(
             """
-            🎉 比賽即將開始! Event is starting soon!
+            🎒 比賽即將開始! Competition is starting soon!
 
             - 🏆 ${event.name}
             - 📅 ${event.eventDate}

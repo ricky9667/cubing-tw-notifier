@@ -28,7 +28,7 @@ class EventNotificationServiceTest {
 
         service.notifyNewEvent(event)
         service.notifyRegistrationOpen(event)
-        service.notifyEventStart(event)
+        service.notifyCompetitionStart(event)
 
         assertEquals(
             listOf(
@@ -50,7 +50,7 @@ class EventNotificationServiceTest {
                 🔗 馬上報名 Register Now: https://cubing-tw.net/event/123/registration
                 """.trimIndent(),
                 """
-                🎉 比賽即將開始! Event is starting soon!
+                🎒 比賽即將開始! Competition is starting soon!
 
                 - 🏆 Example Competition
                 - 📅 2026/10/01

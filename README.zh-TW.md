@@ -31,3 +31,5 @@ DB_NAME=cubing_events
 執行 `./gradlew bootRun` 啟動應用程式。Spring Boot 會啟動 `compose.yml` 中的 PostgreSQL 服務並連線。應用程式啟動時會爬取 Cubing TW。沒有機器人憑證時，應用程式不會發送通知。若要連接測試用機器人，請在啟動前設定環境變數 `DISCORD_BOT_TOKEN`，或同時設定 `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_CHAT_ID`。啟動時爬取網站可能會發送通知，請使用測試用的接收頻道。
 
 執行 `./gradlew test` 跑自動化測試。測試使用記憶體內的 H2 資料庫，不需要 Docker 或機器人憑證。
+
+發布版本時，將提交標記為 `vX.Y.Z` 並推送標籤。發布流程會把標籤傳給 Gradle，將 `X.Y.Z` 寫入 JAR。如要顯示於版本發布頁面，需另外發布 GitHub Release。本機建置預設顯示 `dev`；若要指定版本，傳入 `-PreleaseVersion=vX.Y.Z`。

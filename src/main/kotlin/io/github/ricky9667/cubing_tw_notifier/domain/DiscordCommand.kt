@@ -6,4 +6,5 @@ enum class DiscordCommand(
 ) {
     SUBSCRIBE("subscribe", "Subscribe to receive Cubing TW updates."),
     UNSUBSCRIBE("unsubscribe", "Unsubscribe to stop sending Cubing TW updates."),
+    VERSION("version", "Show the running bot version and release page."),
 }

@@ -31,3 +31,5 @@ DB_NAME=cubing_events
 Start the app with `./gradlew bootRun`. Spring Boot starts the PostgreSQL service in `compose.yml` and connects to it. The app crawls Cubing TW on startup. Without bot credentials, it does not send notifications. To connect test bots, export `DISCORD_BOT_TOKEN` and/or both `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` before starting the app. A startup crawl may send alerts, so use test destinations.
 
 Run the automated tests with `./gradlew test`. They use an in-memory H2 database and need neither Docker nor bot credentials.
+
+For a release, tag the commit `vX.Y.Z` and push the tag. The release workflow passes that tag to Gradle, which embeds `X.Y.Z` in the JAR. Publish a GitHub Release separately to add it to the releases page. Local builds show `dev` unless you pass `-PreleaseVersion=vX.Y.Z`.

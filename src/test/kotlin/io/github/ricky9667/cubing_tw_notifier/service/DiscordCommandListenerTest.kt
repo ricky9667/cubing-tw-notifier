@@ -18,11 +18,60 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.springframework.boot.info.BuildProperties
+import java.util.Properties
 import kotlin.test.assertEquals
 
 class DiscordCommandListenerTest {
     private val repository = mock(DiscordSubscriptionRepository::class.java)
-    private val listener = DiscordCommandListener(repository)
+    private val listener =
+        DiscordCommandListener(
+            repository,
+            BuildProperties(Properties().apply { setProperty("version", "1.2.0") }),
+        )
+
+    @Test
+    fun `version is private and available without manage server permission`() {
+        val event = mock(SlashCommandInteractionEvent::class.java)
+        val reply = mock(ReplyCallbackAction::class.java)
+        `when`(event.guild).thenReturn(mock(Guild::class.java))
+        `when`(event.name).thenReturn("version")
+        `when`(event.reply(org.mockito.ArgumentMatchers.anyString())).thenReturn(reply)
+        `when`(reply.setEphemeral(true)).thenReturn(reply)
+
+        listener.onSlashCommandInteraction(event)
+
+        verify(event).reply(
+            """
+            Cubing TW Notifier v1.2.0
+            Releases: https://github.com/ricky9667/cubing-tw-notifier/releases
+            Website: https://apps.ricky-hu.com/cubing-tw-notifier/
+            """.trimIndent(),
+        )
+        verify(reply).setEphemeral(true)
+        verify(reply).queue()
+    }
+
+    @Test
+    fun `development build displays dev`() {
+        val event = mock(SlashCommandInteractionEvent::class.java)
+        val reply = mock(ReplyCallbackAction::class.java)
+        `when`(event.guild).thenReturn(mock(Guild::class.java))
+        `when`(event.name).thenReturn("version")
+        `when`(event.reply(org.mockito.ArgumentMatchers.anyString())).thenReturn(reply)
+        `when`(reply.setEphemeral(true)).thenReturn(reply)
+
+        DiscordCommandListener(repository, BuildProperties(Properties().apply { setProperty("version", "dev") }))
+            .onSlashCommandInteraction(event)
+
+        verify(event).reply(
+            """
+            Cubing TW Notifier dev
+            Releases: https://github.com/ricky9667/cubing-tw-notifier/releases
+            Website: https://apps.ricky-hu.com/cubing-tw-notifier/
+            """.trimIndent(),
+        )
+    }
 
     @Test
     fun `subscribe stores the selected mention role`() {

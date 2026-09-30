@@ -7,27 +7,41 @@ import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.slf4j.LoggerFactory
+import org.springframework.boot.info.BuildProperties
 import org.springframework.stereotype.Component
 
 @Component
 class DiscordCommandListener(
     private val subscriptionRepository: DiscordSubscriptionRepository,
+    private val buildProperties: BuildProperties,
 ) : ListenerAdapter() {
     private val logger = LoggerFactory.getLogger(DiscordCommandListener::class.java)
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
-        if (event.member?.hasPermission(Permission.MANAGE_SERVER) != true) {
+        val guild = event.guild
+        if (guild == null) {
             event
-                .reply("❌ You must have the \"Manage Server\" permission to use this command.")
+                .reply("❌ This command can only be used inside a server.")
                 .setEphemeral(true)
                 .queue()
             return
         }
 
-        val guild = event.guild
-        if (guild == null) {
+        if (event.name == DiscordCommand.VERSION.eventName) {
+            val version = buildProperties.version.let { if (it == "dev") it else "v$it" }
+            val reply =
+                """
+                Cubing TW Notifier $version
+                Releases: https://github.com/ricky9667/cubing-tw-notifier/releases
+                Website: https://apps.ricky-hu.com/cubing-tw-notifier/
+                """.trimIndent()
+            event.reply(reply).setEphemeral(true).queue()
+            return
+        }
+
+        if (event.member?.hasPermission(Permission.MANAGE_SERVER) != true) {
             event
-                .reply("❌ This command can only be used inside a server.")
+                .reply("❌ You must have the \"Manage Server\" permission to use this command.")
                 .setEphemeral(true)
                 .queue()
             return

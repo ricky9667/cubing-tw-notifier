@@ -4,6 +4,10 @@ The bot announces Cubing TW competition updates to subscribed Discord servers an
 
 ## Language
 
+**Running bot version**:
+The version of the bot currently responding to a command in Discord. It may differ from the newest published release.
+_Avoid_: Latest release
+
 **Discord subscription**:
 A server's choice of one channel for competition alerts and, optionally, one role to tag in those alerts.
 

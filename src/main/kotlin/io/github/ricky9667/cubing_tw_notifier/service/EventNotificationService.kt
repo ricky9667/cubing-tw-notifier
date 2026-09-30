@@ -23,9 +23,16 @@ interface EventNotificationService {
     }
 
     fun notifyRegistrationOpen(event: CubingEvent) {
+        val headline =
+            if (event.reopen == 0) {
+                "🚨 報名即將開始! Registration will begin soon!"
+            } else {
+                "🚨 第${chineseOrdinal(event.reopen)}次重新報名即將開始! ${ordinal(event.reopen)} reopened registration will begin soon!"
+            }
+
         sendNotification(
             """
-            🚨 報名即將開始! Registration will begin soon!
+            $headline
 
             - 🏆 ${event.name}
             - ${registrationTime(event)}
@@ -50,4 +57,18 @@ interface EventNotificationService {
 
     private fun registrationTime(event: CubingEvent) =
         "🚨 報名 Registration: ${event.registrationTime?.format(registrationTimeFormat) ?: "待公布"}"
+
+    private fun chineseOrdinal(number: Int): String = if (number in 1..9) "一二三四五六七八九"[number - 1].toString() else number.toString()
+
+    private fun ordinal(number: Int) =
+        "$number${if (number % 100 in 11..13) {
+            "th"
+        } else {
+            when (number % 10) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
+        }}"
 }

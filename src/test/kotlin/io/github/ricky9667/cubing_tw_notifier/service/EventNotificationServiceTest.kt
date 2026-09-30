@@ -39,7 +39,7 @@ class EventNotificationServiceTest {
                 - 📅 2026/10/01
                 - 🚨 報名 Registration: 2026/09/30 12:00
 
-                🔗 查看比賽資訊 View Event Details: https://cubing-tw.net/event/123
+                🔗 比賽資訊 Details: https://cubing-tw.net/event/123
                 """.trimIndent(),
                 """
                 🚨 報名即將開始! Registration will begin soon!
@@ -55,7 +55,7 @@ class EventNotificationServiceTest {
                 - 🏆 Example Competition
                 - 📅 2026/10/01
 
-                🔗 查看比賽資訊 View Event Details: https://cubing-tw.net/event/123
+                🔗 比賽資訊 Details: https://cubing-tw.net/event/123
                 """.trimIndent(),
             ),
             messages,
@@ -64,5 +64,15 @@ class EventNotificationServiceTest {
         event.registrationTime = null
         service.notifyNewEvent(event)
         assertTrue(messages.last().contains("🚨 報名 Registration: 待公布"))
+
+        event.reopen = 1
+        service.notifyRegistrationOpen(event)
+        assertTrue(
+            messages.last().startsWith("🚨 第一次重新報名即將開始! 1st reopened registration will begin soon!\n\n"),
+        )
+
+        event.reopen = 2
+        service.notifyRegistrationOpen(event)
+        assertTrue(messages.last().startsWith("🚨 第二次重新報名即將開始! 2nd reopened registration will begin soon!\n\n"))
     }
 }

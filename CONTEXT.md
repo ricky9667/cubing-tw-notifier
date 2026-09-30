@@ -12,3 +12,6 @@ The optional Discord role selected with `/subscribe` for tagging in every compet
 
 **Competition alert**:
 A notice about a new competition, registration opening, or a competition starting the next day.
+
+**Registration reopening**:
+A numbered registration opening after a competition's first registration opening. Its number is 1 for the first reopening, 2 for the second, and so on; 0 denotes the first registration opening.

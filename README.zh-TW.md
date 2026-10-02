@@ -1,8 +1,14 @@
-# 台灣魔術方塊賽事通知機器人 (Cubing TW Notifier)
+<div align="center">
+  <img src="assets/icon.png" alt="Cubing TW Notifier logo" width="128">
+  <h1>台灣魔術方塊賽事通知機器人 (Cubing TW Notifier)</h1>
+  <p>
+    <a href="https://github.com/ricky9667/cubing-tw-notifier/releases"><img src="https://img.shields.io/github/v/release/ricky9667/cubing-tw-notifier?display_name=tag&amp;style=for-the-badge" alt="Release"></a>
+    <a href="https://github.com/ricky9667/cubing-tw-notifier/blob/update-readme/LICENSE"><img src="https://img.shields.io/github/license/ricky9667/cubing-tw-notifier?style=for-the-badge" alt="GitHub License"></a>
+  </p>
+  <p><a href="README.md">English</a> | 繁體中文</p>
+</div>
 
-[![Release](https://img.shields.io/github/v/release/ricky9667/cubing-tw-notifier?display_name=tag&style=for-the-badge)](https://github.com/ricky9667/cubing-tw-notifier/releases) [![GitHub License](https://img.shields.io/github/license/ricky9667/cubing-tw-notifier?style=for-the-badge)](https://github.com/ricky9667/cubing-tw-notifier/blob/update-readme/LICENSE)
-
-[English](README.md) | 繁體中文
+## 關於
 
 這是一個追蹤 [Cubing TW](https://cubing-tw.net/event/) 網站更新並發送通知的機器人。
 

@@ -1,8 +1,14 @@
-# Cubing TW Notifier
+<div align="center">
+  <img src="assets/icon.png" alt="Cubing TW Notifier logo" width="128">
+  <h1>Cubing TW Notifier</h1>
+  <p>
+    <a href="https://github.com/ricky9667/cubing-tw-notifier/releases"><img src="https://img.shields.io/github/v/release/ricky9667/cubing-tw-notifier?display_name=tag&amp;style=for-the-badge" alt="Release"></a>
+    <a href="https://github.com/ricky9667/cubing-tw-notifier/blob/update-readme/LICENSE"><img src="https://img.shields.io/github/license/ricky9667/cubing-tw-notifier?style=for-the-badge" alt="GitHub License"></a>
+  </p>
+  <p>English | <a href="README.zh-TW.md">繁體中文</a></p>
+</div>
 
-[![Release](https://img.shields.io/github/v/release/ricky9667/cubing-tw-notifier?display_name=tag&style=for-the-badge)](https://github.com/ricky9667/cubing-tw-notifier/releases) [![GitHub License](https://img.shields.io/github/license/ricky9667/cubing-tw-notifier?style=for-the-badge)](https://github.com/ricky9667/cubing-tw-notifier/blob/update-readme/LICENSE)
-
-English | [繁體中文](README.zh-TW.md)
+## About
 
 A notifier bot that checks for updates from [Cubing TW](https://cubing-tw.net/event/) website.
 
